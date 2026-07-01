@@ -1,92 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AnyCraft</title>
-
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:#87CEEB;
+background:#87ceeb;
 font-family:Arial;
 }
-
 canvas{
 display:block;
-background:linear-gradient(#87CEEB,#7CFC00);
+image-rendering:pixelated;
 }
-
 #ui{
 position:absolute;
 top:10px;
 left:10px;
 color:white;
-text-shadow:2px 2px 5px black;
+font-size:20px;
+text-shadow:2px 2px black;
 }
-
-.bar{
-width:200px;
-height:20px;
-background:#333;
-margin:5px 0;
-border:2px solid white;
-}
-
-.fill{
-height:100%;
-background:red;
-width:100%;
-}
-
-#hunger .fill{
-background:orange;
-}
-
 #hotbar{
 position:absolute;
-bottom:20px;
+bottom:10px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
-gap:5px;
 }
-
 .slot{
 width:50px;
 height:50px;
 border:2px solid white;
-background:rgba(0,0,0,.4);
-}
-
-button{
-padding:10px 20px;
-font-size:18px;
-margin-top:10px;
-cursor:pointer;
+background:#555;
+margin:2px;
 }
 </style>
 </head>
-
 <body>
 
-<canvas id="game"></canvas>
-
 <div id="ui">
-<h1>AnyCraft</h1>
-
-<div>Health</div>
-<div class="bar">
-<div class="fill"></div>
-</div>
-
-<div>Hunger</div>
-<div class="bar" id="hunger">
-<div class="fill"></div>
-</div>
-
-<button onclick="startGame()">Play</button>
+❤️ 20<br>
+🍖 20
 </div>
 
 <div id="hotbar">
@@ -101,50 +57,142 @@ cursor:pointer;
 <div class="slot"></div>
 </div>
 
+<canvas id="game"></canvas>
+
 <script>
+
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-function resize(){
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
-}
-resize();
-window.onresize=resize;
+
+const TILE=32;
 
 let player={
 x:200,
-y:200,
-size:30,
-speed:5
+y:100,
+w:28,
+h:28,
+vx:0,
+vy:0,
+ground:false
 };
 
 let keys={};
 
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
+document.onkeydown=e=>keys[e.key]=true;
+document.onkeyup=e=>keys[e.key]=false;
+
+let world=[];
+
+for(let x=0;x<100;x++){
+
+world[x]=[];
+
+for(let y=0;y<30;y++){
+
+if(y>16) world[x][y]=1;
+else world[x][y]=0;
+
+}
+
+}
+
+canvas.oncontextmenu=e=>e.preventDefault();
+
+canvas.onmousedown=function(e){
+
+let rect=canvas.getBoundingClientRect();
+
+let mx=Math.floor((e.clientX-rect.left)/TILE);
+
+let my=Math.floor((e.clientY-rect.top)/TILE);
+
+if(e.button==0){
+
+world[mx][my]=0;
+
+}
+
+if(e.button==2){
+
+world[mx][my]=1;
+
+}
+
+}
 
 function update(){
 
-if(keys["w"])player.y-=player.speed;
-if(keys["s"])player.y+=player.speed;
-if(keys["a"])player.x-=player.speed;
-if(keys["d"])player.x+=player.speed;
+player.vx=0;
+
+if(keys["a"]) player.vx=-4;
+if(keys["d"]) player.vx=4;
+
+if(keys[" "]&&player.ground){
+
+player.vy=-12;
+player.ground=false;
+
+}
+
+player.vy+=0.6;
+
+player.x+=player.vx;
+player.y+=player.vy;
+
+player.ground=false;
+
+let tx=Math.floor((player.x+14)/TILE);
+let ty=Math.floor((player.y+28)/TILE);
+
+if(world[tx]&&world[tx][ty]==1){
+
+player.y=ty*TILE-player.h;
+player.vy=0;
+player.ground=true;
+
+}
+
+draw();
+
+requestAnimationFrame(update);
+
+}
+
+function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.fillStyle="#55aa33";
-ctx.fillRect(0,canvas.height/2,canvas.width,canvas.height/2);
+ctx.fillStyle="#87ceeb";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+for(let x=0;x<100;x++){
+
+for(let y=0;y<30;y++){
+
+if(world[x][y]==1){
+
+ctx.fillStyle="#6b4423";
+ctx.fillRect(x*TILE,y*TILE,TILE,TILE);
+
+ctx.fillStyle="#3cb043";
+ctx.fillRect(x*TILE,y*TILE,TILE,5);
+
+}
+
+}
+
+}
 
 ctx.fillStyle="blue";
-ctx.fillRect(player.x,player.y,player.size,player.size);
+ctx.fillRect(player.x,player.y,player.w,player.h);
 
-requestAnimationFrame(update);
 }
 
-function startGame(){
 update();
-}
+
 </script>
 
 </body>
