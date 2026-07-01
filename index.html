@@ -1,13 +1,151 @@
-AnyCraft/
-│── index.html
-│── style.css
-│── game.js
-│── world.js
-│── player.js
-│── inventory.js
-│── ui.js
-│── assets/
-│   ├── textures/
-│   ├── sounds/
-│   └── icons/
-└── README.md
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnyCraft</title>
+
+<style>
+body{
+margin:0;
+overflow:hidden;
+background:#87CEEB;
+font-family:Arial;
+}
+
+canvas{
+display:block;
+background:linear-gradient(#87CEEB,#7CFC00);
+}
+
+#ui{
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+text-shadow:2px 2px 5px black;
+}
+
+.bar{
+width:200px;
+height:20px;
+background:#333;
+margin:5px 0;
+border:2px solid white;
+}
+
+.fill{
+height:100%;
+background:red;
+width:100%;
+}
+
+#hunger .fill{
+background:orange;
+}
+
+#hotbar{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:5px;
+}
+
+.slot{
+width:50px;
+height:50px;
+border:2px solid white;
+background:rgba(0,0,0,.4);
+}
+
+button{
+padding:10px 20px;
+font-size:18px;
+margin-top:10px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="ui">
+<h1>AnyCraft</h1>
+
+<div>Health</div>
+<div class="bar">
+<div class="fill"></div>
+</div>
+
+<div>Hunger</div>
+<div class="bar" id="hunger">
+<div class="fill"></div>
+</div>
+
+<button onclick="startGame()">Play</button>
+</div>
+
+<div id="hotbar">
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+<div class="slot"></div>
+</div>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+}
+resize();
+window.onresize=resize;
+
+let player={
+x:200,
+y:200,
+size:30,
+speed:5
+};
+
+let keys={};
+
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
+
+function update(){
+
+if(keys["w"])player.y-=player.speed;
+if(keys["s"])player.y+=player.speed;
+if(keys["a"])player.x-=player.speed;
+if(keys["d"])player.x+=player.speed;
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#55aa33";
+ctx.fillRect(0,canvas.height/2,canvas.width,canvas.height/2);
+
+ctx.fillStyle="blue";
+ctx.fillRect(player.x,player.y,player.size,player.size);
+
+requestAnimationFrame(update);
+}
+
+function startGame(){
+update();
+}
+</script>
+
+</body>
+</html>
